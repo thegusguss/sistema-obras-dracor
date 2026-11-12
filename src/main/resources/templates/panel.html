@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'panel', ~{::section})}">
+<head><title>Panel de obras · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title">Panel de obras</h1>
+    <p class="page-sub">Situación general de las obras y alertas del día.</p>
+
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-lg-3"><div class="card kpi info"><div class="card-body"><div class="lbl">Obras registradas</div><div class="num" th:text="${panel.totalObras}">0</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card kpi ok"><div class="card-body"><div class="lbl">Avance promedio</div><div class="num"><span th:text="${#numbers.formatDecimal(panel.avancePromedio,1,1,'POINT')}">0</span>%</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card kpi danger"><div class="card-body"><div class="lbl">Obras retrasadas</div><div class="num" th:text="${panel.retrasadas}">0</div></div></div></div>
+        <div class="col-6 col-lg-3"><div class="card kpi"><div class="card-body"><div class="lbl">Incidencias abiertas</div><div class="num" th:text="${panel.incidenciasAbiertas}">0</div></div></div></div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">Obras por estado</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between" th:each="e : ${panel.obrasPorEstado}">
+                        <span th:text="${e.key}">Estado</span><span class="badge text-bg-secondary" th:text="${e.value}">0</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">Propuestas por estado</div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between" th:each="e : ${panel.propuestasPorEstado}">
+                        <span th:text="${e.key}">Estado</span><span class="badge text-bg-secondary" th:text="${e.value}">0</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">Alertas de actividades</div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span><i class="bi bi-exclamation-octagon text-danger me-1"></i> Vencidas</span>
+                        <span class="badge text-bg-danger fs-6" th:text="${panel.vencidas}">0</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span><i class="bi bi-hourglass-split text-warning me-1"></i> Por vencer</span>
+                        <span class="badge text-bg-warning fs-6" th:text="${panel.porVencer}">0</span>
+                    </div>
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/alertas}">Ver detalle</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between"><span>Obras en curso</span><a th:href="@{/obras}" class="small">Ver todas</a></div>
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead><tr><th>Código</th><th>Obra</th><th>Cliente</th><th style="width:22%">Avance</th><th>Fin previsto</th><th>Estado</th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${panel.obrasActivas}">
+                    <td><a th:href="@{/obras/{id}(id=${r.obra.id})}" th:text="${r.obra.codigo}">OB-001</a></td>
+                    <td th:text="${r.obra.nombre}">Obra</td>
+                    <td th:text="${r.obra.cliente != null ? r.obra.cliente.razonSocial : '—'}">Cliente</td>
+                    <td><div th:replace="~{fragments/ui :: barra(${r.avanceEntero}, ${r.retrasada} ? 'danger' : 'success')}"></div></td>
+                    <td th:text="${#temporals.format(r.obra.fechaFin,'dd/MM/yyyy')}">fecha</td>
+                    <td><span th:replace="~{fragments/ui :: estado(${r.estadoTexto}, ${r.badge})}"></span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(panel.obrasActivas)}"><td colspan="6" class="text-center text-muted py-4">No hay obras en curso.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+</body>
+</html>

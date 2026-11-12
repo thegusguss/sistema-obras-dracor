@@ -100,6 +100,26 @@ public class ObraService {
         return new ObraResumen(o, promedio(acts), acts.size(), terminadas, vencidas, abiertas, activa && vencidas > 0);
     }
 
+    /** RF-12 y RN-11: promedio ponderado por el peso de las actividades. */
+    public double promedio(List<Actividad> acts) {
+        if (acts.isEmpty()) {
+            return 0;
+        }
+        double suma = 0;
+        double pesos = 0;
+        for (Actividad a : acts) {
+            int peso = Math.max(a.getPeso(), 1);
+            suma += (double) peso * a.getAvance();
+            pesos += peso;
+        }
+        return Math.round(suma / pesos * 10.0) / 10.0;
+    }
+
+    @Transactional(readOnly = true)
+    public double calcularAvance(Long obraId) {
+        return promedio(actividades.findByObraIdOrderByFechaInicioAscIdAsc(obraId));
+    }
+
     @Transactional(readOnly = true)
     public String sugerirCodigo() {
         int anio = LocalDate.now().getYear();
@@ -234,5 +254,37 @@ public class ObraService {
             pend.add(sin + " actividad(es) sin terminar ni justificar");
         }
         return pend;
+    }
+
+    // ------------------------------------------------------------------ estado automatico
+    /** Ajusta el estado de la obra segun el avance de sus actividades. */
+    @Transactional
+    public void recalcularEstado(Long obraId) {
+        Obra o = obtener(obraId);
+        List<Actividad> acts = actividades.findByObraIdOrderByFechaInicioAscIdAsc(obraId);
+        boolean alguno = false;
+        boolean todas = !acts.isEmpty();
+        for (Actividad a : acts) {
+            if (a.getAvance() > 0) {
+                alguno = true;
+            }
+            if (a.getAvance() < 100) {
+                todas = false;
+            }
+        }
+        EstadoObra anterior = o.getEstado();
+        if (anterior == EstadoObra.PLANIFICADA && alguno) {
+            o.setEstado(EstadoObra.EN_EJECUCION);
+        } else if (anterior == EstadoObra.EN_EJECUCION && todas) {
+            o.setEstado(EstadoObra.FINALIZADA);
+        } else if (anterior == EstadoObra.FINALIZADA && !todas) {
+            o.setEstado(EstadoObra.EN_EJECUCION);
+        }
+        if (o.getEstado() != anterior) {
+            repo.save(o);
+            historial.registrar("Obra", o.getId(), o.getId(), "CAMBIO_ESTADO",
+                    "Cambio automático de estado de la obra " + o.getCodigo() + ": «" + anterior.getEtiqueta()
+                            + "» a «" + o.getEstado().getEtiqueta() + "».");
+        }
     }
 }

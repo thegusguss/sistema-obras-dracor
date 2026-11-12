@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{fragments/layout :: layout(~{::title}, 'obras', ~{::section})}">
+<head><title>Obra · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title" th:text="${obra.id == null} ? 'Nueva obra' : 'Editar obra'">Obra</h1>
+    <p class="page-sub">Toda obra nace de una propuesta aceptada o de una orden de servicio / contrato. Los campos con * son obligatorios.</p>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <form class="card" th:action="@{/obras/guardar}" method="post">
+        <div class="card-body row g-3">
+            <input type="hidden" name="id" th:value="${obra.id}">
+            <div class="col-md-3"><label class="form-label req">Código</label><input class="form-control" name="codigo" th:value="${obra.codigo}" required maxlength="30"></div>
+            <div class="col-md-9"><label class="form-label req">Nombre de la obra o servicio</label><input class="form-control" name="nombre" th:value="${obra.nombre}" required maxlength="200"></div>
+            <div class="col-md-6"><label class="form-label req">Cliente</label>
+                <select class="form-select" name="cliente.id" required>
+                    <option value="">Seleccione…</option>
+                    <option th:each="c : ${clientes}" th:value="${c.id}" th:text="${c.razonSocial}" th:selected="${obra.cliente != null and obra.cliente.id == c.id}">c</option></select></div>
+            <div class="col-md-6"><label class="form-label">Jefe de proyecto</label>
+                <select class="form-select" name="jefe.id">
+                    <option value="">Sin asignar</option>
+                    <option th:each="j : ${jefes}" th:value="${j.id}" th:text="${j.nombreCompleto}" th:selected="${obra.jefe != null and obra.jefe.id == j.id}">j</option></select></div>
+            <div class="col-md-4"><label class="form-label req">Origen</label>
+                <select class="form-select" name="origen" id="origen" required onchange="alternarOrigen()">
+                    <option th:each="o : ${origenes}" th:value="${o}" th:text="${o.etiqueta}" th:selected="${o == obra.origen}">o</option></select></div>
+            <div class="col-md-5" id="grpPropuesta"><label class="form-label">Propuesta aceptada</label>
+                <select class="form-select" name="propuesta.id">
+                    <option value="">Seleccione…</option>
+                    <option th:each="p : ${propuestas}" th:value="${p.id}"
+                            th:text="${p.codigo} + ' · ' + ${p.requerimiento.cliente.razonSocial} + ' · S/ ' + ${#numbers.formatDecimal(p.monto,1,'COMMA',2,'POINT')}"
+                            th:selected="${obra.propuesta != null and obra.propuesta.id == p.id}">p</option></select></div>
+            <div class="col-md-5" id="grpOrden"><label class="form-label">N.º de orden de servicio / contrato</label><input class="form-control" name="nroOrdenContrato" th:value="${obra.nroOrdenContrato}" maxlength="60"></div>
+            <div class="col-md-12"><label class="form-label">Ubicación</label><input class="form-control" name="ubicacion" th:value="${obra.ubicacion}" maxlength="200"></div>
+            <div class="col-md-3"><label class="form-label req">Inicio previsto</label><input class="form-control" type="date" name="fechaInicio" th:value="${obra.fechaInicio}" required></div>
+            <div class="col-md-3"><label class="form-label req">Fin previsto</label><input class="form-control" type="date" name="fechaFin" th:value="${obra.fechaFin}" required></div>
+            <div class="col-md-6 d-flex align-items-end"><div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="rc" name="requiereConformidad" value="true" th:checked="${obra.requiereConformidad}"><input type="hidden" name="_requiereConformidad" value="on">
+                <label class="form-check-label" for="rc">Requiere acta de conformidad para el cierre</label></div></div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-dracor" type="submit"><i class="bi bi-save"></i> Guardar</button>
+            <a class="btn btn-outline-secondary" th:href="@{/obras}">Cancelar</a>
+        </div>
+    </form>
+    <script>
+        function alternarOrigen() {
+            var prop = document.getElementById('origen').value === 'PROPUESTA_ACEPTADA';
+            document.getElementById('grpPropuesta').style.display = prop ? '' : 'none';
+            document.getElementById('grpOrden').style.display = prop ? 'none' : '';
+        }
+        alternarOrigen();
+    </script>
+</section>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{fragments/layout :: layout(~{::title}, 'obras', ~{::section})}">
+<head><title>Detalle de obra · DRACOR</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+        <div>
+            <h1 class="page-title"><span th:text="${obra.codigo}">OB-001</span> · <span th:text="${obra.nombre}">Obra</span></h1>
+            <p class="page-sub mb-0">
+                <span th:text="${obra.cliente != null ? obra.cliente.razonSocial : ''}">cliente</span>
+                <span th:if="${obra.ubicacion}"> · <span th:text="${obra.ubicacion}">ubicación</span></span>
+            </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')">
+            <a class="btn btn-outline-primary" th:if="${obra.estado.name() != 'CERRADA'}" th:href="@{/obras/{id}/editar(id=${obra.id})}"><i class="bi bi-pencil"></i> Editar</a>
+            <form th:each="s : ${siguientes}" th:if="${s.name() != 'CERRADA'}" th:action="@{/obras/{id}/estado(id=${obra.id})}" method="post">
+                <input type="hidden" name="nuevo" th:value="${s}">
+                <button class="btn btn-navy" type="submit" th:text="'Pasar a: ' + ${s.etiqueta}">x</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="card kpi"><div class="card-body"><div class="lbl">Estado</div><div class="mt-1"><span th:replace="~{fragments/ui :: estado(${r.estadoTexto}, ${r.badge})}"></span></div></div></div></div>
+        <div class="col-md-3"><div class="card kpi ok"><div class="card-body"><div class="lbl">Avance ponderado</div><div class="num"><span th:text="${#numbers.formatDecimal(r.avance,1,1,'POINT')}">0</span>%</div></div></div></div>
+        <div class="col-md-3"><div class="card kpi info"><div class="card-body"><div class="lbl">Actividades terminadas</div><div class="num"><span th:text="${r.terminadas}">0</span> / <span th:text="${r.totalActividades}">0</span></div></div></div></div>
+        <div class="col-md-3"><div class="card kpi danger"><div class="card-body"><div class="lbl">Vencidas · Incid. abiertas</div><div class="num"><span th:text="${r.vencidas}">0</span> · <span th:text="${r.incidenciasAbiertas}">0</span></div></div></div></div>
+    </div>
+    <div class="mb-3"><div th:replace="~{fragments/ui :: barra(${r.avanceEntero}, ${r.retrasada} ? 'danger' : 'success')}"></div></div>
+
+    <ul class="nav nav-tabs mb-3" role="tablist">
+    </ul>
+
+    <div class="tab-content">
+    </div>
+</section>
+</body>
+</html>

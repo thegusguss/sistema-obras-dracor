@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{fragments/layout :: layout(~{::title}, 'obras', ~{::section})}">
+<head><title>Obras · DRACOR</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><h1 class="page-title">Obras</h1><p class="page-sub mb-0">Seguimiento del avance de todas las obras.</p></div>
+        <a class="btn btn-dracor" th:href="@{/obras/nueva}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')"><i class="bi bi-plus-lg"></i> Nueva obra</a>
+    </div>
+    <div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+        <thead><tr><th>Código</th><th>Obra</th><th>Cliente</th><th>Jefe</th><th style="width:18%">Avance</th><th>Inicio</th><th>Fin previsto</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${obras}">
+            <td class="fw-semibold" th:text="${r.obra.codigo}">OB</td>
+            <td th:text="${r.obra.nombre}">obra</td>
+            <td th:text="${r.obra.cliente != null ? r.obra.cliente.razonSocial : '—'}">c</td>
+            <td th:text="${r.obra.jefe != null ? r.obra.jefe.nombreCompleto : '—'}">j</td>
+            <td><div th:replace="~{fragments/ui :: barra(${r.avanceEntero}, ${r.retrasada} ? 'danger' : 'success')}"></div></td>
+            <td th:text="${#temporals.format(r.obra.fechaInicio,'dd/MM/yyyy')}">f</td>
+            <td th:text="${#temporals.format(r.obra.fechaFin,'dd/MM/yyyy')}">f</td>
+            <td><span th:replace="~{fragments/ui :: estado(${r.estadoTexto}, ${r.badge})}"></span></td>
+            <td class="text-end"><a class="btn btn-sm btn-outline-primary" th:href="@{/obras/{id}(id=${r.obra.id})}">Abrir</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(obras)}"><td colspan="9" class="text-center text-muted py-4">No hay obras registradas.</td></tr>
+        </tbody></table></div></div>
+</section>
+</body>
+</html>

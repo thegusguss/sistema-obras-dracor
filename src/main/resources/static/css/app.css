@@ -1,0 +1,50 @@
+:root {
+  --dr-navy: #0f2a43;
+  --dr-navy-2: #17395a;
+  --dr-accent: #e8891a;
+  --dr-bg: #f3f5f8;
+  --dr-text: #1f2d3d;
+}
+body { background: var(--dr-bg); color: var(--dr-text); font-size: .92rem; }
+.sidebar { width: 245px; min-height: 100vh; background: linear-gradient(180deg, var(--dr-navy) 0%, #0b1f33 100%); position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+.sidebar .brand { background: #fff; padding: 14px 16px; text-align: center; border-bottom: 3px solid var(--dr-accent); }
+.sidebar .brand img { max-height: 44px; max-width: 100%; }
+.sidebar .sys { color: #9fb4c9; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; padding: 14px 18px 4px; }
+.sidebar a.nav-link { color: #d3deea; padding: 9px 18px; border-left: 3px solid transparent; display: flex; align-items: center; gap: 10px; }
+.sidebar a.nav-link:hover { background: rgba(255,255,255,.06); color: #fff; }
+.sidebar a.nav-link.active { background: rgba(232,137,26,.16); border-left-color: var(--dr-accent); color: #fff; font-weight: 600; }
+.main { margin-left: 245px; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar { background: #fff; border-bottom: 1px solid #dde3ea; padding: 10px 28px; display: flex; justify-content: space-between; align-items: center; }
+.content { padding: 24px 28px; flex: 1; }
+.footer { padding: 12px 28px; color: #7a8a9b; font-size: .78rem; border-top: 1px solid #dde3ea; background: #fff; }
+.page-title { font-size: 1.35rem; font-weight: 700; color: var(--dr-navy); margin: 0; }
+.page-sub { color: #6b7c8f; margin: 0 0 18px; }
+.card { border: 0; box-shadow: 0 1px 3px rgba(15,42,67,.10); border-radius: 10px; }
+.card-header { background: #fff; border-bottom: 1px solid #e6ebf1; font-weight: 600; color: var(--dr-navy); border-radius: 10px 10px 0 0 !important; }
+.btn-dracor { background: var(--dr-accent); border-color: var(--dr-accent); color: #fff; font-weight: 600; }
+.btn-dracor:hover { background: #cf7710; border-color: #cf7710; color: #fff; }
+.btn-navy { background: var(--dr-navy); border-color: var(--dr-navy); color: #fff; }
+.btn-navy:hover { background: var(--dr-navy-2); color: #fff; }
+.table thead th { background: #eef2f7; color: var(--dr-navy); font-weight: 600; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; border-bottom: 0; white-space: nowrap; }
+.table td { vertical-align: middle; }
+.kpi { border-left: 4px solid var(--dr-accent); }
+.kpi .num { font-size: 1.9rem; font-weight: 700; color: var(--dr-navy); line-height: 1.1; }
+.kpi .lbl { color: #6b7c8f; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+.kpi.danger { border-left-color: #dc3545; }
+.kpi.ok { border-left-color: #198754; }
+.kpi.info { border-left-color: #0d6efd; }
+.progress { height: 14px; background: #e6ebf1; border-radius: 8px; }
+.progress-bar { font-size: .7rem; font-weight: 600; }
+label.form-label { font-weight: 600; font-size: .82rem; color: var(--dr-navy); margin-bottom: 3px; }
+.req::after { content: " *"; color: #dc3545; }
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--dr-navy) 0%, #1d4a73 60%, #2a5f8f 100%); padding: 20px; }
+.login-card { width: 100%; max-width: 410px; background: #fff; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.35); overflow: hidden; }
+.login-card .top { padding: 22px 26px 12px; text-align: center; border-bottom: 3px solid var(--dr-accent); }
+.login-card .top img { max-height: 54px; }
+.login-card .body { padding: 24px 28px 20px; }
+.evid-thumb { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; background: #eef2f7; }
+.anulado { text-decoration: line-through; color: #8a97a5; }
+.nav-tabs .nav-link { color: #4a5d72; font-weight: 600; }
+.nav-tabs .nav-link.active { color: var(--dr-navy); border-bottom: 3px solid var(--dr-accent); }
+@media print { .sidebar, .topbar, .footer, .no-print { display: none !important; } .main { margin-left: 0; } }
+@media (max-width: 900px) { .sidebar { position: static; width: 100%; min-height: auto; } .main { margin-left: 0; } }

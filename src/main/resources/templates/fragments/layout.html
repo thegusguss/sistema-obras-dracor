@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(titulo, menu, contenido)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:replace="${titulo}">DRACOR</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap-icons/1.11.3/font/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="icon" th:href="@{/img/logo-dracor.png}">
+</head>
+<body>
+<nav class="sidebar">
+    <div class="brand"><img th:src="@{/img/logo-dracor.png}" alt="DRACOR"></div>
+    <div class="sys">Gestión de obras</div>
+    <a class="nav-link" th:classappend="${menu == 'panel'} ? 'active'" th:href="@{/panel}"><i class="bi bi-speedometer2"></i> Panel de obras</a>
+    <a class="nav-link" th:classappend="${menu == 'obras'} ? 'active'" th:href="@{/obras}"><i class="bi bi-building"></i> Obras</a>
+    <a class="nav-link" th:classappend="${menu == 'alertas'} ? 'active'" th:href="@{/alertas}"><i class="bi bi-bell"></i> Alertas</a>
+
+    <div class="sys" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','ADMINISTRATIVO')">Comercial</div>
+    <a class="nav-link" th:classappend="${menu == 'clientes'} ? 'active'" th:href="@{/clientes}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','ADMINISTRATIVO')"><i class="bi bi-people"></i> Clientes</a>
+    <a class="nav-link" th:classappend="${menu == 'requerimientos'} ? 'active'" th:href="@{/requerimientos}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','ADMINISTRATIVO')"><i class="bi bi-inbox"></i> Requerimientos</a>
+    <a class="nav-link" th:classappend="${menu == 'propuestas'} ? 'active'" th:href="@{/propuestas}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','ADMINISTRATIVO')"><i class="bi bi-file-earmark-text"></i> Propuestas</a>
+
+    <div class="sys">Documentación</div>
+    <a class="nav-link" th:classappend="${menu == 'documentos'} ? 'active'" th:href="@{/documentos}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','ADMINISTRATIVO','SUPERVISOR')"><i class="bi bi-folder2-open"></i> Documentos</a>
+    <a class="nav-link" th:classappend="${menu == 'reportes'} ? 'active'" th:href="@{/reportes}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','ADMINISTRATIVO')"><i class="bi bi-bar-chart-line"></i> Reportes</a>
+
+    <div class="sys" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')">Administración</div>
+    <a class="nav-link" th:classappend="${menu == 'usuarios'} ? 'active'" th:href="@{/usuarios}" sec:authorize="hasRole('ADMINISTRADOR')"><i class="bi bi-person-gear"></i> Usuarios y perfiles</a>
+    <a class="nav-link" th:classappend="${menu == 'tipos'} ? 'active'" th:href="@{/tipos-documento}" sec:authorize="hasRole('ADMINISTRADOR')"><i class="bi bi-tags"></i> Tipos documentales</a>
+    <a class="nav-link" th:classappend="${menu == 'auditoria'} ? 'active'" th:href="@{/auditoria}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')"><i class="bi bi-clock-history"></i> Historial</a>
+</nav>
+
+<div class="main">
+    <header class="topbar">
+        <div class="text-muted small">Sistema de Gestión y Seguimiento del Avance de Obras</div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="text-end lh-sm">
+                <div class="fw-semibold" th:text="${yo != null ? yo.nombreCompleto : ''}">Usuario</div>
+                <div class="text-muted small" th:text="${yo != null ? yo.rolesTexto : ''}">Rol</div>
+            </div>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button class="btn btn-sm btn-outline-secondary" type="submit"><i class="bi bi-box-arrow-right"></i> Salir</button>
+            </form>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="alert alert-success alert-dismissible fade show" th:if="${ok}">
+            <i class="bi bi-check-circle me-1"></i><span th:text="${ok}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show" th:if="${error}">
+            <i class="bi bi-exclamation-triangle me-1"></i><span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <section th:replace="${contenido}">contenido</section>
+    </main>
+
+    <footer class="footer d-flex justify-content-between">
+        <span>DRACOR · Sistema de Gestión y Seguimiento del Avance de Obras</span>
+        <span>Versión 1.0</span>
+    </footer>
+</div>
+<script th:src="@{/webjars/bootstrap/5.3.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

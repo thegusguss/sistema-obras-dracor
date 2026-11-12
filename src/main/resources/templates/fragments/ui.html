@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="barra(v, color)" class="progress">
+    <div class="progress-bar" th:classappend="'bg-' + ${color}" role="progressbar"
+         th:style="'width:' + ${v} + '%'" th:text="${v} + '%'">0%</div>
+</div>
+<span th:fragment="estado(texto, badge)" class="badge" th:classappend="'text-bg-' + ${badge}" th:text="${texto}">estado</span>
+</body>
+</html>

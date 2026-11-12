@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'usuarios', ~{::section})}">
+<head><title>Usuario · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title" th:text="${usuario.id == null} ? 'Nuevo usuario' : 'Editar usuario'">Usuario</h1>
+    <p class="page-sub">Los campos con * son obligatorios.</p>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <form class="card" th:action="@{/usuarios/guardar}" method="post">
+        <div class="card-body row g-3">
+            <input type="hidden" name="id" th:value="${usuario.id}">
+            <div class="col-md-6"><label class="form-label req">Nombres</label><input class="form-control" name="nombres" th:value="${usuario.nombres}" required maxlength="80"></div>
+            <div class="col-md-6"><label class="form-label req">Apellidos</label><input class="form-control" name="apellidos" th:value="${usuario.apellidos}" required maxlength="80"></div>
+            <div class="col-md-4"><label class="form-label req">DNI (8 dígitos)</label><input class="form-control" name="dni" th:value="${usuario.dni}" required pattern="[0-9]{8}" maxlength="8"></div>
+            <div class="col-md-4"><label class="form-label req">Usuario</label><input class="form-control" name="username" th:value="${usuario.username}" required maxlength="40"></div>
+            <div class="col-md-4"><label class="form-label" th:classappend="${usuario.id == null} ? 'req'">Contraseña (mín. 8)</label>
+                <input class="form-control" type="password" name="clave" minlength="8" th:required="${usuario.id == null}" autocomplete="new-password">
+                <div class="form-text" th:if="${usuario.id != null}">Déjela vacía para conservar la actual.</div></div>
+            <div class="col-12">
+                <label class="form-label req">Roles</label>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="form-check" th:each="r : ${todosRoles}">
+                        <input class="form-check-input" type="checkbox" name="roles" th:id="'rol-' + ${r}" th:value="${r}" th:checked="${usuario.roles != null and usuario.roles.contains(r)}">
+                        <label class="form-check-label" th:for="'rol-' + ${r}" th:text="${r.etiqueta}">rol</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="activo" id="activo" value="true" th:checked="${usuario.activo}">
+                    <input type="hidden" name="_activo" value="on">
+                    <label class="form-check-label" for="activo">Usuario activo</label>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-dracor" type="submit"><i class="bi bi-save"></i> Guardar</button>
+            <a class="btn btn-outline-secondary" th:href="@{/usuarios}">Cancelar</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

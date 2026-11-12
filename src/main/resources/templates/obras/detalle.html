@@ -29,9 +29,44 @@
     <div class="mb-3"><div th:replace="~{fragments/ui :: barra(${r.avanceEntero}, ${r.retrasada} ? 'danger' : 'success')}"></div></div>
 
     <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#t-act" type="button">Actividades</button></li>
     </ul>
 
     <div class="tab-content">
+    <!-- ACTIVIDADES -->
+    <div class="tab-pane fade show active" id="t-act">
+        <div class="d-flex justify-content-end mb-2" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')">
+            <a class="btn btn-dracor btn-sm" th:if="${obra.estado.name() != 'CERRADA'}" th:href="@{/actividades/nueva(obraId=${obra.id})}"><i class="bi bi-plus-lg"></i> Nueva actividad</a>
+        </div>
+        <div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+            <thead><tr><th>Actividad</th><th>Responsable</th><th>Inicio</th><th>Fin</th><th>Peso</th><th style="width:16%">Avance</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+            <tbody>
+            <tr th:each="a : ${actividades}">
+                <td><span class="fw-semibold" th:text="${a.nombre}">a</span><div class="small text-muted" th:if="${a.justificada}">Justificada: <span th:text="${a.justificacion}"></span></div></td>
+                <td th:text="${a.responsable != null ? a.responsable.nombreCompleto : '—'}">r</td>
+                <td th:text="${#temporals.format(a.fechaInicio,'dd/MM/yyyy')}">f</td>
+                <td th:text="${#temporals.format(a.fechaFin,'dd/MM/yyyy')}" th:classappend="${a.avance < 100 and !a.justificada and a.fechaFin.isBefore(hoy)} ? 'text-danger fw-bold'">f</td>
+                <td th:text="${a.peso}">1</td>
+                <td><div th:replace="~{fragments/ui :: barra(${a.avance}, ${a.avance >= 100} ? 'success' : 'primary')}"></div></td>
+                <td th:text="${a.estadoTexto}">e</td>
+                <td class="text-end text-nowrap">
+                    <a class="btn btn-sm btn-navy" th:if="${obra.estado.name() != 'CERRADA'}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','SUPERVISOR')" th:href="@{/avances/actividad/{id}(id=${a.id})}" title="Registrar avance"><i class="bi bi-graph-up-arrow"></i></a>
+                    <span sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')" th:if="${obra.estado.name() != 'CERRADA'}">
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/actividades/{id}/editar(id=${a.id})}" title="Editar"><i class="bi bi-pencil"></i></a>
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" th:attr="data-bs-target='#just' + ${a.id}" title="Justificar"><i class="bi bi-chat-square-text"></i></button>
+                    </span>
+                    <div class="modal fade text-start" th:id="'just' + ${a.id}" tabindex="-1"><div class="modal-dialog"><form class="modal-content" th:action="@{/actividades/{id}/justificar(id=${a.id})}" method="post">
+                        <input type="hidden" name="obraId" th:value="${obra.id}">
+                        <div class="modal-header"><h5 class="modal-title">Justificar actividad</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                        <div class="modal-body"><p class="small text-muted">Use esta opción cuando la actividad no se completará y debe permitir el cierre de la obra.</p>
+                            <label class="form-label req">Justificación</label><textarea class="form-control" name="texto" rows="3" required></textarea></div>
+                        <div class="modal-footer"><button class="btn btn-dracor" type="submit">Guardar</button></div></form></div></div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(actividades)}"><td colspan="8" class="text-center text-muted py-4">Aún no hay actividades registradas.</td></tr>
+            </tbody></table></div></div>
+    </div>
+
     </div>
 </section>
 </body>

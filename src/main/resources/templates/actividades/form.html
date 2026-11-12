@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{fragments/layout :: layout(~{::title}, 'obras', ~{::section})}">
+<head><title>Actividad · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title" th:text="${actividad.id == null} ? 'Nueva actividad' : 'Editar actividad'">Actividad</h1>
+    <p class="page-sub">Obra: <strong th:text="${actividad.obra.codigo} + ' · ' + ${actividad.obra.nombre}">obra</strong>. Las fechas deben estar dentro del plazo de la obra.</p>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <form class="card" th:action="@{/actividades/guardar}" method="post">
+        <div class="card-body row g-3">
+            <input type="hidden" name="id" th:value="${actividad.id}">
+            <input type="hidden" name="obraId" th:value="${actividad.obra.id}">
+            <div class="col-md-8"><label class="form-label req">Nombre</label><input class="form-control" name="nombre" th:value="${actividad.nombre}" required maxlength="150"></div>
+            <div class="col-md-4"><label class="form-label">Responsable</label>
+                <select class="form-select" name="responsable.id">
+                    <option value="">Sin asignar</option>
+                    <option th:each="u : ${responsables}" th:value="${u.id}" th:text="${u.nombreCompleto}" th:selected="${actividad.responsable != null and actividad.responsable.id == u.id}">u</option></select></div>
+            <div class="col-md-3"><label class="form-label req">Inicio previsto</label><input class="form-control" type="date" name="fechaInicio" th:value="${actividad.fechaInicio}" required></div>
+            <div class="col-md-3"><label class="form-label req">Fin previsto</label><input class="form-control" type="date" name="fechaFin" th:value="${actividad.fechaFin}" required></div>
+            <div class="col-md-3"><label class="form-label req">Peso (1–100)</label><input class="form-control" type="number" min="1" max="100" name="peso" th:value="${actividad.peso}" required>
+                <div class="form-text">Importancia relativa en el avance de la obra.</div></div>
+            <div class="col-12"><label class="form-label">Descripción</label><textarea class="form-control" name="descripcion" rows="3" th:text="${actividad.descripcion}"></textarea></div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-dracor" type="submit"><i class="bi bi-save"></i> Guardar</button>
+            <a class="btn btn-outline-secondary" th:href="@{/obras/{id}(id=${actividad.obra.id})}">Cancelar</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'alertas', ~{::section})}">
+<head><title>Alertas · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title">Alertas de actividades</h1>
+    <p class="page-sub">Actividades vencidas y por vencer (aviso <span th:text="${dias}">3</span> días antes).</p>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header text-danger"><i class="bi bi-exclamation-octagon me-1"></i> Vencidas</div>
+                <div class="table-responsive"><table class="table table-sm mb-0">
+                    <thead><tr><th>Obra</th><th>Actividad</th><th>Responsable</th><th>Avance</th><th>Retraso</th></tr></thead>
+                    <tbody>
+                    <tr th:each="a : ${vencidas}">
+                        <td><a th:href="@{/obras/{id}(id=${a.actividad.obra.id})}" th:text="${a.actividad.obra.codigo}">OB</a></td>
+                        <td th:text="${a.actividad.nombre}">act</td>
+                        <td th:text="${a.actividad.responsable != null ? a.actividad.responsable.nombreCompleto : '—'}">resp</td>
+                        <td th:text="${a.actividad.avance} + '%'">0%</td>
+                        <td><span class="badge text-bg-danger" th:text="${a.dias} + ' d'">1 d</span></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(vencidas)}"><td colspan="5" class="text-center text-muted py-3">Sin actividades vencidas.</td></tr>
+                    </tbody></table></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header text-warning"><i class="bi bi-hourglass-split me-1"></i> Por vencer</div>
+                <div class="table-responsive"><table class="table table-sm mb-0">
+                    <thead><tr><th>Obra</th><th>Actividad</th><th>Responsable</th><th>Avance</th><th>Faltan</th></tr></thead>
+                    <tbody>
+                    <tr th:each="a : ${porVencer}">
+                        <td><a th:href="@{/obras/{id}(id=${a.actividad.obra.id})}" th:text="${a.actividad.obra.codigo}">OB</a></td>
+                        <td th:text="${a.actividad.nombre}">act</td>
+                        <td th:text="${a.actividad.responsable != null ? a.actividad.responsable.nombreCompleto : '—'}">resp</td>
+                        <td th:text="${a.actividad.avance} + '%'">0%</td>
+                        <td><span class="badge text-bg-warning" th:text="${a.dias} + ' d'">2 d</span></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(porVencer)}"><td colspan="5" class="text-center text-muted py-3">Sin actividades por vencer.</td></tr>
+                    </tbody></table></div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

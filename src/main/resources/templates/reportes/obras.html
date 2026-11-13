@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{fragments/layout :: layout(~{::title}, 'reportes', ~{::section})}">
+<head><title>Reporte de obras · DRACOR</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div><h1 class="page-title">Reporte de obras</h1></div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-danger" th:href="@{/reportes/obras/pdf(filtro=${filtro})}"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+            <a class="btn btn-success" th:href="@{/reportes/obras/excel(filtro=${filtro})}"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+        </div>
+    </div>
+    <form class="row g-2 mb-3" method="get" th:action="@{/reportes/obras}">
+        <div class="col-md-4"><select class="form-select" name="filtro" onchange="this.form.submit()">
+            <option th:each="f : ${filtros}" th:value="${f[0]}" th:text="${f[1]}" th:selected="${f[0] == filtro}">f</option></select></div>
+    </form>
+    <div th:replace="~{reportes/_tabla :: tabla(${tabla})}"></div>
+</section>
+</body>
+</html>

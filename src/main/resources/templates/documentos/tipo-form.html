@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'tipos', ~{::section})}">
+<head><title>Tipo documental · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title" th:text="${tipo.id == null} ? 'Nuevo tipo documental' : 'Editar tipo documental'">Tipo</h1>
+    <p class="page-sub">Defina cómo se usa el documento en el sistema.</p>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+    <form class="card" style="max-width:640px" th:action="@{/tipos-documento/guardar}" method="post">
+        <div class="card-body row g-3">
+            <input type="hidden" name="id" th:value="${tipo.id}">
+            <div class="col-12"><label class="form-label req">Nombre</label><input class="form-control" name="nombre" th:value="${tipo.nombre}" required maxlength="100"></div>
+            <div class="col-12"><div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="obl" name="obligatorio" value="true" th:checked="${tipo.obligatorio}"><input type="hidden" name="_obligatorio" value="on">
+                <label class="form-check-label" for="obl">Obligatorio antes de enviar una propuesta</label></div></div>
+            <div class="col-12"><div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="conf" name="conformidad" value="true" th:checked="${tipo.conformidad}"><input type="hidden" name="_conformidad" value="on">
+                <label class="form-check-label" for="conf">Es documento de conformidad (para cerrar obras)</label></div></div>
+            <div class="col-12"><div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="act" name="activo" value="true" th:checked="${tipo.activo}"><input type="hidden" name="_activo" value="on">
+                <label class="form-check-label" for="act">Activo</label></div></div>
+        </div>
+        <div class="card-footer bg-white d-flex gap-2">
+            <button class="btn btn-dracor" type="submit"><i class="bi bi-save"></i> Guardar</button>
+            <a class="btn btn-outline-secondary" th:href="@{/tipos-documento}">Cancelar</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'tipos', ~{::section})}">
+<head><title>Tipos documentales · DRACOR</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><h1 class="page-title">Tipos documentales</h1><p class="page-sub mb-0">Catálogo de documentos; los obligatorios se exigen antes de enviar una propuesta.</p></div>
+        <a class="btn btn-dracor" th:href="@{/tipos-documento/nuevo}"><i class="bi bi-plus-lg"></i> Nuevo tipo</a>
+    </div>
+    <div class="card"><table class="table table-hover mb-0">
+        <thead><tr><th>Nombre</th><th>Obligatorio en propuestas</th><th>Conformidad de cierre</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+        <tbody>
+        <tr th:each="t : ${tipos}">
+            <td class="fw-semibold" th:text="${t.nombre}">n</td>
+            <td th:text="${t.obligatorio} ? 'Sí' : 'No'">No</td>
+            <td th:text="${t.conformidad} ? 'Sí' : 'No'">No</td>
+            <td><span class="badge" th:classappend="${t.activo} ? 'text-bg-success' : 'text-bg-secondary'" th:text="${t.activo} ? 'Activo' : 'Inactivo'">a</span></td>
+            <td class="text-end text-nowrap">
+                <a class="btn btn-sm btn-outline-primary" th:href="@{/tipos-documento/{id}/editar(id=${t.id})}"><i class="bi bi-pencil"></i></a>
+                <form class="d-inline" th:action="@{/tipos-documento/{id}/estado(id=${t.id})}" method="post">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${t.activo} ? 'Desactivar' : 'Activar'">x</button></form>
+            </td>
+        </tr>
+        </tbody></table></div>
+</section>
+</body>
+</html>

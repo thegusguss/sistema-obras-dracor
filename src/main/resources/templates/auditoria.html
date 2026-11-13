@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'auditoria', ~{::section})}">
+<head><title>Historial · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title">Historial de actualizaciones</h1>
+    <p class="page-sub">Trazabilidad de los cambios realizados en el sistema (últimos 200 registros).</p>
+    <form class="row g-2 mb-3" method="get" th:action="@{/auditoria}">
+        <div class="col-auto">
+            <select name="entidad" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="">Todos los módulos</option>
+                <option th:each="e : ${T(java.util.List).of('Usuario','Cliente','Requerimiento','Propuesta','Documento','Obra','Actividad','Avance','Incidencia','Evidencia')}"
+                        th:value="${e}" th:text="${e}" th:selected="${e == entidad}">e</option>
+            </select>
+        </div>
+    </form>
+    <div class="card"><div class="table-responsive"><table class="table table-sm table-hover mb-0">
+        <thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Detalle</th></tr></thead>
+        <tbody>
+        <tr th:each="h : ${registros}">
+            <td class="text-nowrap" th:text="${#temporals.format(h.fechaHora,'dd/MM/yyyy HH:mm')}">fecha</td>
+            <td th:text="${h.usuario}">u</td>
+            <td th:text="${h.entidad}">e</td>
+            <td th:text="${h.accion}">a</td>
+            <td th:text="${h.detalle}">d</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(registros)}"><td colspan="5" class="text-center text-muted py-4">Sin registros.</td></tr>
+        </tbody></table></div></div>
+</section>
+</body>
+</html>

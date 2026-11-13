@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{fragments/layout :: layout(~{::title}, 'reportes', ~{::section})}">
+<head><title>Reportes · DRACOR</title></head>
+<body>
+<section>
+    <h1 class="page-title">Reportes</h1>
+    <p class="page-sub">Consulte en pantalla y exporte a PDF o Excel.</p>
+    <div class="row g-3">
+        <div class="col-md-4" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')"><div class="card h-100"><div class="card-body">
+            <h5><i class="bi bi-building text-warning"></i> Reporte de obras</h5>
+            <p class="text-muted">Obras pendientes, en ejecución, retrasadas y finalizadas con su avance.</p>
+            <a class="btn btn-navy" th:href="@{/reportes/obras}">Abrir</a></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body">
+            <h5><i class="bi bi-file-earmark-text text-warning"></i> Reporte de propuestas</h5>
+            <p class="text-muted">Propuestas por estado, cliente y monto.</p>
+            <a class="btn btn-navy" th:href="@{/reportes/propuestas}">Abrir</a></div></div></div>
+        <div class="col-md-4"><div class="card h-100"><div class="card-body">
+            <h5><i class="bi bi-folder2-open text-warning"></i> Reporte de documentos</h5>
+            <p class="text-muted">Documentos por obra o por propuesta.</p>
+            <a class="btn btn-navy" th:href="@{/reportes/documentos}">Abrir</a></div></div></div>
+    </div>
+</section>
+</body>
+</html>

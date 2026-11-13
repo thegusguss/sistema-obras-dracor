@@ -29,9 +29,125 @@
     <div class="mb-3"><div th:replace="~{fragments/ui :: barra(${r.avanceEntero}, ${r.retrasada} ? 'danger' : 'success')}"></div></div>
 
     <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#t-act" type="button">Actividades</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t-evi" type="button">Evidencias <span class="badge text-bg-secondary" th:text="${#lists.size(evidencias)}">0</span></button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t-doc" type="button">Documentos <span class="badge text-bg-secondary" th:text="${#lists.size(documentos)}">0</span></button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#t-his" type="button">Historial</button></li>
     </ul>
 
     <div class="tab-content">
+    <!-- ACTIVIDADES -->
+    <div class="tab-pane fade show active" id="t-act">
+        <div class="d-flex justify-content-end mb-2" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')">
+            <a class="btn btn-dracor btn-sm" th:if="${obra.estado.name() != 'CERRADA'}" th:href="@{/actividades/nueva(obraId=${obra.id})}"><i class="bi bi-plus-lg"></i> Nueva actividad</a>
+        </div>
+        <div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+            <thead><tr><th>Actividad</th><th>Responsable</th><th>Inicio</th><th>Fin</th><th>Peso</th><th style="width:16%">Avance</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+            <tbody>
+            <tr th:each="a : ${actividades}">
+                <td><span class="fw-semibold" th:text="${a.nombre}">a</span><div class="small text-muted" th:if="${a.justificada}">Justificada: <span th:text="${a.justificacion}"></span></div></td>
+                <td th:text="${a.responsable != null ? a.responsable.nombreCompleto : '—'}">r</td>
+                <td th:text="${#temporals.format(a.fechaInicio,'dd/MM/yyyy')}">f</td>
+                <td th:text="${#temporals.format(a.fechaFin,'dd/MM/yyyy')}" th:classappend="${a.avance < 100 and !a.justificada and a.fechaFin.isBefore(hoy)} ? 'text-danger fw-bold'">f</td>
+                <td th:text="${a.peso}">1</td>
+                <td><div th:replace="~{fragments/ui :: barra(${a.avance}, ${a.avance >= 100} ? 'success' : 'primary')}"></div></td>
+                <td th:text="${a.estadoTexto}">e</td>
+                <td class="text-end text-nowrap">
+                    <a class="btn btn-sm btn-navy" th:if="${obra.estado.name() != 'CERRADA'}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','SUPERVISOR')" th:href="@{/avances/actividad/{id}(id=${a.id})}" title="Registrar avance"><i class="bi bi-graph-up-arrow"></i></a>
+                    <span sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO')" th:if="${obra.estado.name() != 'CERRADA'}">
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/actividades/{id}/editar(id=${a.id})}" title="Editar"><i class="bi bi-pencil"></i></a>
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="modal" th:attr="data-bs-target='#just' + ${a.id}" title="Justificar"><i class="bi bi-chat-square-text"></i></button>
+                    </span>
+                    <div class="modal fade text-start" th:id="'just' + ${a.id}" tabindex="-1"><div class="modal-dialog"><form class="modal-content" th:action="@{/actividades/{id}/justificar(id=${a.id})}" method="post">
+                        <input type="hidden" name="obraId" th:value="${obra.id}">
+                        <div class="modal-header"><h5 class="modal-title">Justificar actividad</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                        <div class="modal-body"><p class="small text-muted">Use esta opción cuando la actividad no se completará y debe permitir el cierre de la obra.</p>
+                            <label class="form-label req">Justificación</label><textarea class="form-control" name="texto" rows="3" required></textarea></div>
+                        <div class="modal-footer"><button class="btn btn-dracor" type="submit">Guardar</button></div></form></div></div>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(actividades)}"><td colspan="8" class="text-center text-muted py-4">Aún no hay actividades registradas.</td></tr>
+            </tbody></table></div></div>
+    </div>
+
+    <!-- EVIDENCIAS -->
+    <div class="tab-pane fade" id="t-evi">
+        <div class="card mb-3" th:if="${obra.estado.name() != 'CERRADA'}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','SUPERVISOR')">
+            <div class="card-header">Cargar evidencia (fotos, planos, actas)</div>
+            <form class="card-body row g-2" th:action="@{/evidencias/subir}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="obraId" th:value="${obra.id}">
+                <div class="col-md-3"><label class="form-label">Actividad</label><select class="form-select form-select-sm" name="actividadId">
+                    <option value="">General de la obra</option>
+                    <option th:each="a : ${actividades}" th:value="${a.id}" th:text="${a.nombre}">a</option></select></div>
+                <div class="col-md-4"><label class="form-label">Descripción</label><input class="form-control form-control-sm" name="descripcion" maxlength="200"></div>
+                <div class="col-md-3"><label class="form-label req">Archivo</label><input class="form-control form-control-sm" type="file" name="archivo" required></div>
+                <div class="col-md-2 d-flex align-items-end"><button class="btn btn-sm btn-dracor w-100" type="submit"><i class="bi bi-upload"></i> Subir</button></div>
+            </form>
+        </div>
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-3" th:each="e : ${evidencias}">
+                <div class="card h-100" th:classappend="${e.anulada} ? 'opacity-50'">
+                    <img class="evid-thumb" th:if="${e.imagen and !e.anulada}" th:src="@{/evidencias/{id}/ver(id=${e.id})}" alt="evidencia">
+                    <div class="evid-thumb d-flex align-items-center justify-content-center text-muted" th:unless="${e.imagen and !e.anulada}"><i class="bi bi-file-earmark-text" style="font-size:2.4rem"></i></div>
+                    <div class="card-body p-2 small">
+                        <div class="fw-semibold" th:text="${e.descripcion} ?: ${e.archivoOriginal}">desc</div>
+                        <div class="text-muted" th:text="${e.actividad != null ? e.actividad.nombre : 'General'}">act</div>
+                        <div class="text-muted" th:text="${#temporals.format(e.fechaSubida,'dd/MM/yyyy HH:mm')}">f</div>
+                        <div class="text-danger" th:if="${e.anulada}">Anulada: <span th:text="${e.motivoAnulacion}"></span></div>
+                        <div class="mt-1" th:unless="${e.anulada}">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/evidencias/{id}/ver(id=${e.id})}" target="_blank"><i class="bi bi-eye"></i></a>
+                            <button th:if="${obra.estado.name() != 'CERRADA'}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','SUPERVISOR')" class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="modal" th:attr="data-bs-target='#anev' + ${e.id}"><i class="bi bi-x-circle"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal fade" th:id="'anev' + ${e.id}" tabindex="-1"><div class="modal-dialog"><form class="modal-content" th:action="@{/evidencias/{id}/anular(id=${e.id})}" method="post">
+                    <input type="hidden" name="obraId" th:value="${obra.id}">
+                    <div class="modal-header"><h5 class="modal-title">Anular evidencia</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body"><p class="small text-muted">La evidencia no se elimina; queda anulada con su motivo.</p>
+                        <label class="form-label req">Motivo</label><input class="form-control" name="motivo" required></div>
+                    <div class="modal-footer"><button class="btn btn-danger" type="submit">Anular</button></div></form></div></div>
+            </div>
+            <div class="col-12 text-center text-muted py-4" th:if="${#lists.isEmpty(evidencias)}">Aún no hay evidencias cargadas.</div>
+        </div>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div class="tab-pane fade" id="t-doc">
+        <div class="card mb-3" th:if="${obra.estado.name() != 'CERRADA'}" sec:authorize="hasAnyRole('ADMINISTRADOR','JEFE_PROYECTO','SUPERVISOR','ADMINISTRATIVO')">
+            <div class="card-header">Cargar documento de la obra</div>
+            <form class="card-body row g-2" th:action="@{/documentos/subir}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="obraId" th:value="${obra.id}">
+                <input type="hidden" name="volver" th:value="'/obras/' + ${obra.id}">
+                <div class="col-md-3"><select class="form-select form-select-sm" name="tipoId" required>
+                    <option value="">Tipo de documento…</option>
+                    <option th:each="t : ${tipos}" th:value="${t.id}" th:text="${t.nombre}">t</option></select></div>
+                <div class="col-md-3"><input class="form-control form-control-sm" name="nombre" placeholder="Nombre (opcional)"></div>
+                <div class="col-md-4"><input class="form-control form-control-sm" type="file" name="archivo" required></div>
+                <div class="col-md-2"><button class="btn btn-sm btn-navy w-100" type="submit"><i class="bi bi-upload"></i> Subir</button></div>
+            </form>
+        </div>
+        <div class="card"><table class="table table-sm mb-0"><thead><tr><th>Tipo</th><th>Nombre</th><th>Tamaño</th><th>Fecha</th><th></th></tr></thead><tbody>
+            <tr th:each="d : ${documentos}" th:classappend="${d.anulado} ? 'anulado'">
+                <td th:text="${d.tipo.nombre}">t</td><td th:text="${d.nombre}">n</td><td th:text="${d.tamanoTexto}">1 KB</td>
+                <td th:text="${#temporals.format(d.fechaSubida,'dd/MM/yyyy HH:mm')}">f</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" th:unless="${d.anulado}" th:href="@{/documentos/{id}/descargar(id=${d.id})}"><i class="bi bi-download"></i></a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(documentos)}"><td colspan="5" class="text-muted text-center py-3">Sin documentos.</td></tr>
+        </tbody></table></div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="tab-pane fade" id="t-his">
+        <div class="card"><div class="table-responsive"><table class="table table-sm mb-0">
+            <thead><tr><th>Fecha y hora</th><th>Usuario</th><th>Módulo</th><th>Acción</th><th>Detalle</th></tr></thead>
+            <tbody>
+            <tr th:each="h : ${historial}">
+                <td class="text-nowrap" th:text="${#temporals.format(h.fechaHora,'dd/MM/yyyy HH:mm')}">f</td>
+                <td th:text="${h.usuario}">u</td><td th:text="${h.entidad}">e</td><td th:text="${h.accion}">a</td><td th:text="${h.detalle}">d</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(historial)}"><td colspan="5" class="text-center text-muted py-3">Sin movimientos.</td></tr>
+            </tbody></table></div></div>
+    </div>
     </div>
 </section>
 </body>

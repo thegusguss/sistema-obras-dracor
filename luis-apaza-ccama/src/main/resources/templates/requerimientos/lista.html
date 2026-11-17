@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'requerimientos', ~{::section})}">
+<head><title>Requerimientos · DRACOR</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><h1 class="page-title">Requerimientos de clientes</h1><p class="page-sub mb-0">Solicitudes recibidas de entidades y clientes.</p></div>
+        <a class="btn btn-dracor" th:href="@{/requerimientos/nuevo}"><i class="bi bi-plus-lg"></i> Nuevo requerimiento</a>
+    </div>
+    <div class="card"><div class="table-responsive"><table class="table table-hover mb-0">
+        <thead><tr><th>N.º</th><th>Cliente</th><th>Descripción</th><th>Origen</th><th>Recepción</th><th>Fecha límite</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${requerimientos}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.cliente.razonSocial}">cliente</td>
+            <td th:text="${#strings.abbreviate(r.descripcion,70)}">desc</td>
+            <td th:text="${r.origen.etiqueta}">origen</td>
+            <td th:text="${#temporals.format(r.fechaRecepcion,'dd/MM/yyyy')}">f</td>
+            <td th:text="${#temporals.format(r.fechaLimite,'dd/MM/yyyy')}">f</td>
+            <td class="text-end"><a class="btn btn-sm btn-outline-primary" th:href="@{/requerimientos/{id}(id=${r.id})}">Abrir</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(requerimientos)}"><td colspan="7" class="text-center text-muted py-4">No hay requerimientos registrados.</td></tr>
+        </tbody></table></div></div>
+</section>
+</body>
+</html>

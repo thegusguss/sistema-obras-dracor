@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'requerimientos', ~{::section})}">
+<head><title>Requerimiento · DRACOR</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div><h1 class="page-title">Requerimiento N.º <span th:text="${req.id}">1</span></h1>
+        <p class="page-sub mb-0" th:text="${req.cliente.razonSocial}">cliente</p></div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" th:href="@{/requerimientos/{id}/editar(id=${req.id})}"><i class="bi bi-pencil"></i> Editar</a>
+            <a class="btn btn-dracor" th:href="@{/propuestas/nueva(requerimientoId=${req.id})}"><i class="bi bi-file-earmark-plus"></i> Elaborar propuesta</a>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-5"><div class="card h-100"><div class="card-header">Datos</div><div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-5">Origen</dt><dd class="col-7" th:text="${req.origen.etiqueta}">o</dd>
+                <dt class="col-5">Recepción</dt><dd class="col-7" th:text="${#temporals.format(req.fechaRecepcion,'dd/MM/yyyy')}">f</dd>
+                <dt class="col-5">Fecha límite</dt><dd class="col-7" th:text="${#temporals.format(req.fechaLimite,'dd/MM/yyyy')} ?: '—'">f</dd>
+                <dt class="col-12">Descripción</dt><dd class="col-12" th:text="${req.descripcion}">d</dd>
+            </dl></div></div></div>
+        <div class="col-lg-7"><div class="card h-100"><div class="card-header">Propuestas asociadas</div>
+            <table class="table mb-0"><thead><tr><th>Código</th><th>Monto</th><th>Estado</th><th></th></tr></thead><tbody>
+            <tr th:each="p : ${propuestas}">
+                <td th:text="${p.codigo}">PRO-0001</td>
+                <td th:text="'S/ ' + ${#numbers.formatDecimal(p.monto,1,'COMMA',2,'POINT')}">monto</td>
+                <td th:text="${p.estado.etiqueta}">estado</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-primary" th:href="@{/propuestas/{id}(id=${p.id})}">Abrir</a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(propuestas)}"><td colspan="4" class="text-muted text-center py-3">Aún no hay propuestas para este requerimiento.</td></tr>
+            </tbody></table></div></div>
+    </div>
+    <div class="card mt-3">
+        <div class="card-header">Documentos del requerimiento</div>
+        <div class="card-body border-bottom">
+            <form class="row g-2" th:action="@{/documentos/subir}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="requerimientoId" th:value="${req.id}">
+                <input type="hidden" name="volver" th:value="'/requerimientos/' + ${req.id}">
+                <div class="col-md-3"><select class="form-select form-select-sm" name="tipoId" required>
+                    <option value="">Tipo de documento…</option>
+                    <option th:each="t : ${tipos}" th:value="${t.id}" th:text="${t.nombre}">t</option></select></div>
+                <div class="col-md-3"><input class="form-control form-control-sm" name="nombre" placeholder="Nombre (opcional)"></div>
+                <div class="col-md-4"><input class="form-control form-control-sm" type="file" name="archivo" required></div>
+                <div class="col-md-2"><button class="btn btn-sm btn-navy w-100" type="submit"><i class="bi bi-upload"></i> Subir</button></div>
+            </form>
+        </div>
+        <table class="table table-sm mb-0"><thead><tr><th>Tipo</th><th>Nombre</th><th>Tamaño</th><th>Fecha</th><th></th></tr></thead><tbody>
+            <tr th:each="d : ${documentos}" th:classappend="${d.anulado} ? 'anulado'">
+                <td th:text="${d.tipo.nombre}">t</td><td th:text="${d.nombre}">n</td><td th:text="${d.tamanoTexto}">1 KB</td>
+                <td th:text="${#temporals.format(d.fechaSubida,'dd/MM/yyyy HH:mm')}">f</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" th:unless="${d.anulado}" th:href="@{/documentos/{id}/descargar(id=${d.id})}"><i class="bi bi-download"></i></a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(documentos)}"><td colspan="5" class="text-muted text-center py-3">Sin documentos.</td></tr>
+        </tbody></table>
+    </div>
+</section>
+</body>
+</html>

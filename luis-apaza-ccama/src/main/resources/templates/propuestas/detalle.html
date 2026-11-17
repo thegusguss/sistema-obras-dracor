@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout(~{::title}, 'propuestas', ~{::section})}">
+<head><title>Propuesta · DRACOR</title></head>
+<body>
+<section>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h1 class="page-title"><span th:text="${p.codigo}">PRO-0001</span> <span class="badge text-bg-secondary fs-6 align-middle" th:text="${p.estado.etiqueta}">estado</span></h1>
+            <p class="page-sub mb-0"><span th:text="${p.requerimiento.cliente.razonSocial}">cliente</span> · requerimiento N.º <a th:href="@{/requerimientos/{id}(id=${p.requerimiento.id})}" th:text="${p.requerimiento.id}">1</a></p>
+        </div>
+        <a class="btn btn-outline-primary" th:if="${p.estado.name() == 'EN_PREPARACION' or p.estado.name() == 'OBSERVADA'}" th:href="@{/propuestas/{id}/editar(id=${p.id})}"><i class="bi bi-pencil"></i> Editar</a>
+    </div>
+
+    <div class="alert alert-warning" th:if="${!#lists.isEmpty(faltantes) and p.estado.name() == 'EN_PREPARACION'}">
+        <strong>Documentos obligatorios pendientes:</strong> <span th:text="${#strings.listJoin(faltantes, ', ')}">x</span>.
+        Cárguelos antes de enviar la propuesta.
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-5"><div class="card h-100"><div class="card-header">Datos y cambio de estado</div><div class="card-body">
+            <dl class="row">
+                <dt class="col-5">Monto</dt><dd class="col-7" th:text="'S/ ' + ${#numbers.formatDecimal(p.monto,1,'COMMA',2,'POINT')}">m</dd>
+                <dt class="col-5">Fecha de envío</dt><dd class="col-7" th:text="${#temporals.format(p.fechaEnvio,'dd/MM/yyyy')} ?: '—'">f</dd>
+                <dt class="col-12">Detalle</dt><dd class="col-12" th:text="${p.detalle} ?: '—'">d</dd>
+            </dl>
+            <div class="d-flex flex-wrap gap-2" th:if="${!#sets.isEmpty(siguientes)}">
+                <form th:each="s : ${siguientes}" th:action="@{/propuestas/{id}/estado(id=${p.id})}" method="post">
+                    <input type="hidden" name="nuevo" th:value="${s}">
+                    <button class="btn btn-sm btn-navy" type="submit" th:text="'Pasar a: ' + ${s.etiqueta}">x</button>
+                </form>
+            </div>
+        </div></div></div>
+        <div class="col-lg-7"><div class="card h-100"><div class="card-header">Respuestas y observaciones del cliente</div>
+            <div class="card-body border-bottom">
+                <form class="row g-2" th:action="@{/propuestas/{id}/respuesta(id=${p.id})}" method="post">
+                    <div class="col-md-4"><select class="form-select form-select-sm" name="tipo" required>
+                        <option th:each="t : ${tiposRespuesta}" th:value="${t}" th:text="${t.etiqueta}">t</option></select></div>
+                    <div class="col-md-3"><input class="form-control form-control-sm" type="date" name="fecha" th:value="${hoy}"></div>
+                    <div class="col-md-12"><textarea class="form-control form-control-sm" name="detalle" rows="2" placeholder="Detalle de la respuesta u observación"></textarea></div>
+                    <div class="col-12"><button class="btn btn-sm btn-dracor" type="submit"><i class="bi bi-chat-left-text"></i> Registrar</button></div>
+                </form>
+            </div>
+            <table class="table table-sm mb-0"><thead><tr><th>Fecha</th><th>Tipo</th><th>Detalle</th><th>Registró</th></tr></thead><tbody>
+                <tr th:each="r : ${respuestas}">
+                    <td th:text="${#temporals.format(r.fecha,'dd/MM/yyyy')}">f</td>
+                    <td th:text="${r.tipo.etiqueta}">t</td>
+                    <td th:text="${r.detalle}">d</td>
+                    <td th:text="${r.registradoPor != null ? r.registradoPor.nombreCompleto : '—'}">u</td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(respuestas)}"><td colspan="4" class="text-muted text-center py-3">Sin respuestas registradas.</td></tr>
+            </tbody></table></div></div>
+    </div>
+
+    <div class="card mt-3">
+        <div class="card-header">Documentos de la propuesta</div>
+        <div class="card-body border-bottom">
+            <form class="row g-2" th:action="@{/documentos/subir}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="propuestaId" th:value="${p.id}">
+                <input type="hidden" name="volver" th:value="'/propuestas/' + ${p.id}">
+                <div class="col-md-3"><select class="form-select form-select-sm" name="tipoId" required>
+                    <option value="">Tipo de documento…</option>
+                    <option th:each="t : ${tipos}" th:value="${t.id}" th:text="${t.nombre} + (${t.obligatorio} ? ' *' : '')">t</option></select></div>
+                <div class="col-md-3"><input class="form-control form-control-sm" name="nombre" placeholder="Nombre (opcional)"></div>
+                <div class="col-md-4"><input class="form-control form-control-sm" type="file" name="archivo" required></div>
+                <div class="col-md-2"><button class="btn btn-sm btn-navy w-100" type="submit"><i class="bi bi-upload"></i> Subir</button></div>
+            </form>
+        </div>
+        <table class="table table-sm mb-0"><thead><tr><th>Tipo</th><th>Nombre</th><th>Tamaño</th><th>Fecha</th><th></th></tr></thead><tbody>
+            <tr th:each="d : ${documentos}" th:classappend="${d.anulado} ? 'anulado'">
+                <td th:text="${d.tipo.nombre}">t</td><td th:text="${d.nombre}">n</td><td th:text="${d.tamanoTexto}">1 KB</td>
+                <td th:text="${#temporals.format(d.fechaSubida,'dd/MM/yyyy HH:mm')}">f</td>
+                <td class="text-end"><a class="btn btn-sm btn-outline-secondary" th:unless="${d.anulado}" th:href="@{/documentos/{id}/descargar(id=${d.id})}"><i class="bi bi-download"></i></a></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(documentos)}"><td colspan="5" class="text-muted text-center py-3">Sin documentos.</td></tr>
+        </tbody></table>
+    </div>
+</section>
+</body>
+</html>
